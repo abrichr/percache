@@ -14,6 +14,9 @@ Install by running ``easy_install percache`` or ``pip install percache``.
 
 .. _Memoize Example: http://wiki.python.org/moin/PythonDecoratorLibrary#Memoize
 
+.. image:: https://travis-ci.org/obensonne/percache.png?branch=master
+   :target: https://travis-ci.org/obensonne/percache
+
 -------------------------------------------------------------------------------
 Example
 -------------------------------------------------------------------------------
