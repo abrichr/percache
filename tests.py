@@ -35,6 +35,7 @@ import os
 import os.path
 import tempfile
 import time
+import sys
 
 import unittest
 
@@ -52,9 +53,12 @@ class TestCase(unittest.TestCase):
 
     def setUp(self):
         unittest.TestCase.setUp(self)
+        self.c = None
 
     def tearDown(self):
         unittest.TestCase.tearDown(self)
+        if self.c:
+            self.c.close()
 
     def call(self, fn, name, args, kwargs, result, cached):
         expstr = "expecting %s result" % (cached and "cached" or "new")
@@ -67,15 +71,15 @@ class TestCase(unittest.TestCase):
     def test_1(self):
         """Test differentiation of basic numeric arguments."""
 
-        c = Cache(TESTFILE)
+        self.c = Cache(TESTFILE)
 
-        @c
+        @self.c
         def f1(a, b):
             print("computing new result")
             self.frun = True
             return a
 
-        @c
+        @self.c
         def f2(a, b):
             print("computing new result")
             self.frun = True
@@ -90,26 +94,24 @@ class TestCase(unittest.TestCase):
         self.call(f2, "f2", (1.1,0.1), {}, 1.1, False)
         self.call(f2, "f2", (1.1,0.1), {}, 1.1, True)
 
-        c.close()
+        self.c.close()
 
     def test_2(self):
         """Test persistency of cached results."""
 
-        c = Cache(TESTFILE)
+        self.c = Cache(TESTFILE)
 
-        @c
+        @self.c
         def f1(a, b):
             print("computing new result")
             self.frun = True
             return a
 
-        @c
+        @self.c
         def f2(a, b):
             print("computing new result")
             self.frun = True
             return a
-
-        c = Cache(TESTFILE)
 
         self.call(f1, "f1", (1,2), {}, 1, True)
         self.call(f1, "f1", (1,2), {}, 1, True)
@@ -118,14 +120,17 @@ class TestCase(unittest.TestCase):
         self.call(f2, "f2", ("2",3), {}, "2", False)
         self.call(f2, "f2", ("2",3), {}, "2", True)
 
-        c.close()
+        self.c.close()
 
     def test_3(self):
         """Test differentiation of normal and unicode strings."""
 
-        c = Cache(TESTFILE)
+        if sys.version_info[0] == 3:
+            return # Python 3 only has strings
 
-        @c
+        self.c = Cache(TESTFILE)
+
+        @self.c
         def f3(s):
             print("computing new result")
             self.frun = True
@@ -136,14 +141,14 @@ class TestCase(unittest.TestCase):
         self.call(f3, "f3", ("a",), {}, None, True)
         self.call(f3, "f3", (u"a",), {}, None, True)
 
-        c.close()
+        self.c.close()
 
     def test_4(self):
         """Test non-ascii strings as args"""
 
-        c = Cache(TESTFILE)
+        self.c = Cache(TESTFILE)
 
-        @c
+        @self.c
         def f4(a):
             print("computing new result")
             self.frun = True
@@ -157,14 +162,14 @@ class TestCase(unittest.TestCase):
         self.call(f4, "f4", (us,), {}, us, False)
         self.call(f4, "f4", (us,), {}, us, True)
 
-        c.close()
+        self.c.close()
 
     def test_5(self):
         """Test clearing of old cached results."""
 
-        c = Cache(TESTFILE)
+        self.c = Cache(TESTFILE)
 
-        @c
+        @self.c
         def f5(a):
             print("computing new result")
             self.frun = True
@@ -174,19 +179,19 @@ class TestCase(unittest.TestCase):
         time.sleep(2)
         self.call(f5, "f5", (2,), {}, 2, False)
 
-        c.clear(maxage=1)
+        self.c.clear(maxage=1)
 
         self.call(f5, "f5", (1,), {}, 1, False)
         self.call(f5, "f5", (2,), {}, 2, True)
 
-        c.close()
+        self.c.close()
 
     def test_6(self):
         """Test keyword arguments."""
 
-        c = Cache(TESTFILE)
+        self.c = Cache(TESTFILE)
 
-        @c
+        @self.c
         def f6(a, x=1, y=2, z=3):
             print("computing new result")
             self.frun = True
@@ -198,12 +203,12 @@ class TestCase(unittest.TestCase):
         self.call(f6, "f6", (1,), {"y":0,"z":2}, 4, False)
         self.call(f6, "f6", (1,), {"z":2,"y":0}, 4, True)
 
-        c.close()
+        self.c.close()
 
     def test_7(self):
         """Test overridden __repr__ method."""
 
-        c = Cache(TESTFILE)
+        self.c = Cache(TESTFILE)
 
         class X(object):
             def __init__(self, a):
@@ -214,7 +219,7 @@ class TestCase(unittest.TestCase):
             def __init__(self, a):
                 self.a = a
 
-        @c
+        @self.c
         def f7(a):
             print("computing new result")
             self.frun = True
@@ -229,7 +234,7 @@ class TestCase(unittest.TestCase):
         self.call(f7, "f7", (y1,), {}, 0, False)
         self.call(f7, "f7", (y2,), {}, 0, False) # bad __repr__ method
 
-        c.close()
+        self.c.close()
 
     def test_8(self):
         """Test custom repr function."""
@@ -237,11 +242,11 @@ class TestCase(unittest.TestCase):
         def myrepr(a):
             return "foobar"
 
-        c = Cache(TESTFILE, repr=myrepr)
+        self.c = Cache(TESTFILE, repr=myrepr)
 
         class X(object): pass
 
-        @c
+        @self.c
         def f8(a):
             print("computing new result")
             self.frun = True
@@ -253,20 +258,20 @@ class TestCase(unittest.TestCase):
         self.call(f8, "f8", (x3,), {}, 0, True) # stupid repr function
         self.call(f8, "f8", (5,), {}, 0, True) # stupid repr function
 
-        c.close()
+        self.c.close()
 
     def test_check(self):
         """Test if old `check` interface still works."""
 
-        c = Cache(TESTFILE)
+        self.c = Cache(TESTFILE)
 
-        @c.check
+        @self.c.check
         def f1(a, b):
             print("computing new result")
             self.frun = True
             return a
 
-        @c.check
+        @self.c.check
         def f2(a, b):
             print("computing new result")
             self.frun = True
@@ -281,7 +286,7 @@ class TestCase(unittest.TestCase):
         self.call(f2, "f2", (1.1,0.1), {}, 1.1, False)
         self.call(f2, "f2", (1.1,0.1), {}, 1.1, True)
 
-        c.close()
+        self.c.close()
 
     def test_alternative_backend(self):
         """Test alternative backend and live-sync mode."""
@@ -296,15 +301,15 @@ class TestCase(unittest.TestCase):
                 self.synced = True
 
         b = Backend()
-        c = Cache(b, livesync=True)
+        self.c = Cache(b, livesync=True)
 
-        @c
+        @self.c
         def f1(a, b):
             print("computing new result")
             self.frun = True
             return a
 
-        @c
+        @self.c
         def f2(a, b):
             print("computing new result")
             self.frun = True
@@ -321,21 +326,21 @@ class TestCase(unittest.TestCase):
 
         self.assertTrue(b.synced)
         self.assertFalse(b.closed)
-        c.close()
+        self.c.close()
         self.assertTrue(b.closed)
 
         # now without live-sync
 
         b = Backend()
-        c = Cache(b, livesync=False)
+        self.c = Cache(b, livesync=False)
 
-        @c
+        @self.c
         def f3(a, b):
             print("computing new result")
             self.frun = True
             return a
 
-        @c
+        @self.c
         def f4(a, b):
             print("computing new result")
             self.frun = True
@@ -351,7 +356,7 @@ class TestCase(unittest.TestCase):
         self.call(f4, "f2", (1.1,0.1), {}, 1.1, True)
 
         self.assertFalse(b.synced)
-        c.close()
+        self.c.close()
 
 if __name__ == '__main__':
 
