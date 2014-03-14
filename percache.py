@@ -57,25 +57,25 @@ class Cache(object):
     def __init__(self, backend, repr=repr, livesync=False):
         """Create a new persistent cache using the given backend.
 
-	If backend is a string, it is interpreted as a filename and a Python
-	shelve is used as the backend. Otherwise it is interpreted as a
-	mapping-like object with a `close()` and a `sync()`  method. This
-	allows to use alternative backends like *shove* or *redis*.
+    	If backend is a string, it is interpreted as a filename and a Python
+    	shelve is used as the backend. Otherwise it is interpreted as a
+    	mapping-like object with a `close()` and a `sync()`  method. This
+    	allows to use alternative backends like *shove* or *redis*.
 
-	The keyword `repr` may specify an alternative representation function
-	to be applied to the arguments of callables to cache. The
-	representation function is used when calculating a hash of the
-	arguments. Representation functions need to differentiate argument
-	values sufficiently (for the purpose of the callable) and identically
-	across different invocations of the Python interpreter. The default
-	representation function `repr()` is suitable for basic types, lists,
-	tuples and combinations of them as well as for all types which
-	implement the `__repr__()` method according to the requirements
-	mentioned above.
+    	The keyword `repr` may specify an alternative representation function
+    	to be applied to the arguments of callables to cache. The
+    	representation function is used when calculating a hash of the
+    	arguments. Representation functions need to differentiate argument
+    	values sufficiently (for the purpose of the callable) and identically
+    	across different invocations of the Python interpreter. The default
+    	representation function `repr()` is suitable for basic types, lists,
+    	tuples and combinations of them as well as for all types which
+    	implement the `__repr__()` method according to the requirements
+    	mentioned above.
 
         Normally changes are only written to the cache when it is closed or
-	finalized. If `livesync` is `True`, the cache is written to the backend
-	whenever it changes.
+    	finalized. If `livesync` is `True`, the cache is written to the backend
+    	whenever it changes.
 
         """
         self.__livesync = livesync
