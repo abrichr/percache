@@ -83,7 +83,7 @@ class TestCase(unittest.TestCase):
 
         self.call(f1, "f1", (1,2), {}, 1, False)
         self.call(f1, "f1", (1,2), {}, 1, True)
-        self.call(f1, "f1", (1,2L), {}, 1, False)
+        self.call(f1, "f1", (1,2), {}, 1, True)
         self.call(f1, "f1", (1,3), {}, 1, False)
         self.call(f2, "f2", (1,3), {}, 1, False)
         self.call(f2, "f2", (1,3), {}, 1, True)
@@ -112,7 +112,7 @@ class TestCase(unittest.TestCase):
         c = Cache(TESTFILE)
 
         self.call(f1, "f1", (1,2), {}, 1, True)
-        self.call(f1, "f1", (1,2L), {}, 1, True)
+        self.call(f1, "f1", (1,2), {}, 1, True)
         self.call(f1, "f1", (1,3), {}, 1, True)
         self.call(f2, "f2", (1,3), {}, 1, True)
         self.call(f2, "f2", ("2",3), {}, "2", False)
@@ -139,7 +139,25 @@ class TestCase(unittest.TestCase):
         c.close()
 
     def test_4(self):
-        """Free"""
+        """Test non-ascii strings as args"""
+
+        c = Cache(TESTFILE)
+
+        @c
+        def f4(a):
+            print("computing new result")
+            self.frun = True
+            return a
+
+        us = u'über'
+        self.call(f4, "f4", (us,), {}, us, False)
+        self.call(f4, "f4", (us,), {}, us, True)
+
+        us = u'über'.encode('UTF8')
+        self.call(f4, "f4", (us,), {}, us, False)
+        self.call(f4, "f4", (us,), {}, us, True)
+
+        c.close()
 
     def test_5(self):
         """Test clearing of old cached results."""
@@ -256,7 +274,7 @@ class TestCase(unittest.TestCase):
 
         self.call(f1, "f1", (1,2), {}, 1, False)
         self.call(f1, "f1", (1,2), {}, 1, True)
-        self.call(f1, "f1", (1,2L), {}, 1, False)
+        self.call(f1, "f1", (1,2), {}, 1, True)
         self.call(f1, "f1", (1,3), {}, 1, False)
         self.call(f2, "f2", (1,3), {}, 1, False)
         self.call(f2, "f2", (1,3), {}, 1, True)
@@ -294,7 +312,7 @@ class TestCase(unittest.TestCase):
 
         self.call(f1, "f1", (1,2), {}, 1, False)
         self.call(f1, "f1", (1,2), {}, 1, True)
-        self.call(f1, "f1", (1,2L), {}, 1, False)
+        self.call(f1, "f1", (1,2), {}, 1, True)
         self.call(f1, "f1", (1,3), {}, 1, False)
         self.call(f2, "f2", (1,3), {}, 1, False)
         self.call(f2, "f2", (1,3), {}, 1, True)
@@ -325,7 +343,7 @@ class TestCase(unittest.TestCase):
 
         self.call(f3, "f1", (1,2), {}, 1, False)
         self.call(f3, "f1", (1,2), {}, 1, True)
-        self.call(f3, "f1", (1,2L), {}, 1, False)
+        self.call(f3, "f1", (1,2), {}, 1, True)
         self.call(f3, "f1", (1,3), {}, 1, False)
         self.call(f4, "f2", (1,3), {}, 1, False)
         self.call(f4, "f2", (1,3), {}, 1, True)

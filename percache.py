@@ -38,10 +38,16 @@ See http://pypi.python.org/pypi/percache for usage instructions and examples.
 """
 
 import hashlib
-from os.path import exists
+import os
 import shelve
 import sys
 import time
+
+# Py2/3 hack
+try:
+    basestring = basestring
+except NameError:
+    basestring = str
 
 # =============================================================================
 
@@ -86,12 +92,12 @@ class Cache(object):
         def wrapper(*args, **kwargs):
             """Function wrapping the decorated function."""
 
-            ckey = hashlib.sha1(func.__name__) # parameter hash
+            ckey = [func.__name__] # parameter hash
             for a in args:
-                ckey.update(self.__repr(a))
+                ckey.append(self.__repr(a))
             for k in sorted(kwargs):
-                ckey.update("%s:%s" % (k, self.__repr(kwargs[k])))
-            ckey = ckey.hexdigest()
+                ckey.append("%s:%s" % (k, self.__repr(kwargs[k])))
+            ckey = hashlib.sha1(''.join(ckey).encode("UTF8")).hexdigest()
 
             if ckey in self.__cache:
                 result = self.__cache[ckey]
@@ -167,7 +173,7 @@ def _main():
         print("Usage: %s CACHEFILE" % sys.argv[0])
         sys.exit(1)
 
-    if not exists(sys.argv[1]):
+    if not os.path.exists(sys.argv[1]):
         print("no such cache file")
         sys.exit(1)
 
