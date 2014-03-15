@@ -10,7 +10,8 @@ Library but with the advantage that results are stored *persistently* in a
 cache. *percache* provides memoization across multiple invocations of the
 Python interpreter.
 
-Install by running ``easy_install percache`` or ``pip install percache``.
+Install with ``pip install percache``. *percache* works with Python 2.6, 2.7,
+and 3.3 and has no dependencies outside the standard library.
 
 .. _Memoize Example: http://wiki.python.org/moin/PythonDecoratorLibrary#Memoize
 
