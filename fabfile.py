@@ -94,6 +94,10 @@ def release(version):
 
     local("hg tag %s" % version)
 
+    # remove travis build status image as it not necessarily relates to the
+    # version currently published
+    local("sed -i README.rst -re 's/^.*travis-ci\.org.*$//'")
+
     local("python setup.py register sdist upload")
 
     push()
