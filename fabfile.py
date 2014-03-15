@@ -100,4 +100,6 @@ def release(version):
 
     local("python setup.py register sdist upload")
 
+    local("hg revert --no-backup README.rst")
+
     push()
