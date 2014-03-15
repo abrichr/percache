@@ -15,8 +15,8 @@ and 3.3 and has no dependencies outside the standard library.
 
 .. _Memoize Example: http://wiki.python.org/moin/PythonDecoratorLibrary#Memoize
 
-
-
+.. image:: https://travis-ci.org/obensonne/percache.png?branch=master
+   :target: https://travis-ci.org/obensonne/percache
 
 -------------------------------------------------------------------------------
 Example
