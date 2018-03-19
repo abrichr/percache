@@ -94,6 +94,8 @@ class Cache(object):
 
             read_cache = kwargs.get('read_cache', True)
             write_cache = kwargs.get('write_cache', True)
+            kwargs.pop('read_cache', None)
+            kwargs.pop('write_cache', None)
 
             ckey = [func.__name__] # parameter hash
             for a in args:
