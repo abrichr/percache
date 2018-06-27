@@ -38,6 +38,7 @@ See http://pypi.python.org/pypi/percache for usage instructions and examples.
 """
 
 import hashlib
+import inspect
 import os
 import shelve
 import sys
@@ -102,6 +103,10 @@ class Cache(object):
                 ckey.append(self.__repr(a))
             for k in sorted(kwargs):
                 ckey.append("%s:%s" % (k, self.__repr(kwargs[k])))
+            signature = inspect.signature(func)
+            for k, v in signature.parameters.items():
+                if v.default is not inspect.Parameter.empty:
+                    ckey.append("%s:%s" % (k, self.__repr(v.default)))
             ckey = hashlib.sha1(''.join(ckey).encode("UTF8")).hexdigest()
 
             if read_cache and ckey in self.__cache:
