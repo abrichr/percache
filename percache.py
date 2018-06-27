@@ -92,6 +92,11 @@ class Cache(object):
         def wrapper(*args, **kwargs):
             """Function wrapping the decorated function."""
 
+            read_cache = kwargs.get('read_cache', True)
+            write_cache = kwargs.get('write_cache', True)
+            kwargs.pop('read_cache', None)
+            kwargs.pop('write_cache', None)
+
             ckey = [func.__name__] # parameter hash
             for a in args:
                 ckey.append(self.__repr(a))
@@ -99,14 +104,16 @@ class Cache(object):
                 ckey.append("%s:%s" % (k, self.__repr(kwargs[k])))
             ckey = hashlib.sha1(''.join(ckey).encode("UTF8")).hexdigest()
 
-            if ckey in self.__cache:
+            if read_cache and ckey in self.__cache:
                 result = self.__cache[ckey]
             else:
                 result = func(*args, **kwargs)
-                self.__cache[ckey] = result
-            self.__cache["%s:atime" % ckey] = time.time() # access time
-            if self.__livesync:
-                self.__cache.sync()
+                if write_cache:
+                    self.__cache[ckey] = result
+            if read_cache or write_cache:
+                self.__cache["%s:atime" % ckey] = time.time() # access time
+                if self.__livesync:
+                    self.__cache.sync()
             return result
 
         return wrapper
